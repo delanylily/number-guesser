@@ -11,10 +11,8 @@ Game Rules:
 
 let min = 1,
     max = 10,
-    winningNum = 2,
+    winningNum = getRandomNum(min, max),
     guessesLeft = 3;
-
-// UI elements
 
 const game = document.querySelector('#game'),
     minNum = document.querySelector('.min-num'),
@@ -23,28 +21,49 @@ const game = document.querySelector('#game'),
     guessInput = document.querySelector('#guess-input'),
     message = document.querySelector('.message');
 
-// assign ui min and max
-
 minNum.textContent = min;
 maxNum.textContent = max;
 
-// listen for guess
+game.addEventListener('mousedown', function (event) {
+    if (event.target.className === 'play-again') {
+        window.location.reload();
+    }
+});
+
+function getRandomNum(min, max) {
+    return (Math.floor(Math.random() * (max - min + 1) + min));
+}
 
 guessBtn.addEventListener('click', function () {
     let guess = parseInt(guessInput.value);
-    // validate input- check that it's not blank and that it isn't less or more than min and max
     if (isNaN(guess) || guess < min || guess > max) {
         setMessage(`Please enter a number between ${min} and ${max}`, 'red');
     }
-    // check if won
     if (guess === winningNum) {
-        guessInput.disabled = true;
-        guessInput.style.borderColor = 'green';
-        setMessage(`${winningNum} is correct! YOU WIN`, 'green')
+        const message = `${winningNum} is correct! YOU WIN`;
+        gameOver(true, message);
     } else {
-        console.log('lose')
+        guessesLeft -= 1;
+        if (guessesLeft === 0) {
+            const message = `Game Over, you lost, ${winningNum} was the correct number`;
+            gameOver(false, message)
+        } else {
+            guessInput.style.borderColor = 'red';
+            setMessage(`${guess} is not correct, you have ${guessesLeft} left`, 'red');
+            guessInput.value = '';
+        }
     }
 });
+
+function gameOver(won, msg) {
+    let color = won ? 'green' : 'red';
+    guessInput.style.borderColor = color;
+    message.style.color = color;
+    guessInput.disabled = true;
+    setMessage(msg, color);
+    guessBtn.value = 'Play again?';
+    guessBtn.className += 'play-again'
+}
 
 function setMessage(msg, color) {
     message.style.color = color;
